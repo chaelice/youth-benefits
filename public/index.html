@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>청년 혜택 찾기</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%233172F5%22/%3E%3Cpath d=%22M9 16l5 5 9-10%22 stroke=%22white%22 stroke-width=%223.5%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#FFFFFF;--panel:#F5F6F8;--surface:#FFFFFF;--ink:#191F28;--muted:#6B7684;--faint:#8B95A1;--line:#E5E8EB;
+  --accent:#3172F5;--accent-soft:#EAF1FE;--ok:#14915A;--ok-soft:#E5F5EC;--no:#D63B3B;--no-soft:#FCEBEB;--unk:#B26A00;--unk-soft:#FFF4E0;
+  color-scheme:light}
+:root[data-theme="dark"]{--bg:#121417;--panel:#1C1F24;--surface:#23272D;--ink:#ECEEF1;--muted:#A3ACB7;--faint:#7D8794;--line:#30353C;
+  --accent:#6B9BFA;--accent-soft:#1E2A42;--ok:#4CC28A;--ok-soft:#173226;--no:#F07B7B;--no-soft:#3A1D1D;--unk:#F0B04F;--unk-soft:#3A2C14;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121417;--panel:#1C1F24;--surface:#23272D;--ink:#ECEEF1;--muted:#A3ACB7;--faint:#7D8794;--line:#30353C;
+  --accent:#6B9BFA;--accent-soft:#1E2A42;--ok:#4CC28A;--ok-soft:#173226;--no:#F07B7B;--no-soft:#3A1D1D;--unk:#F0B04F;--unk-soft:#3A2C14;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.55;word-break:keep-all;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:48px 16px 80px}
+h1{font-size:1.75rem;line-height:1.3;margin:0;letter-spacing:-.02em}
+.lead{margin:8px 0 0;color:var(--muted)}
+button{font:inherit;color:inherit}
+.drop{margin-top:28px;border:1.5px dashed var(--line);border-radius:16px;padding:22px 20px;text-align:center;background:var(--panel)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop b{font-size:1.0625rem}.drop p{margin:6px 0 0;color:var(--muted);font-size:.875rem}
+.pick{display:inline-block;margin-top:14px;padding:11px 20px;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+.pick:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.docs{font-size:.8125rem;color:var(--muted);margin:10px 0 0;text-align:center}.docs a{color:var(--muted)}
+.files{list-style:none;margin:10px 0 0;padding:0;font-size:.875rem}
+.files li{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line)}
+.files .fn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.files .st{flex:none;color:var(--muted)}.files .st.ok{color:var(--ok)}.files .st.bad{color:var(--no)}
+.gubar{margin:14px 0 0;padding:12px 14px;border-radius:10px;background:var(--panel);font-size:.875rem;color:var(--muted)}
+.gubar button{background:none;border:0;padding:0;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline}
+.or{display:flex;align-items:center;gap:12px;margin:22px 0 12px;color:var(--faint);font-size:.8125rem}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.panel{background:var(--panel);border-radius:16px;padding:6px 20px}
+.row{padding:16px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}
+.row label,.row .lab{display:block;font-size:.875rem;font-weight:600;color:var(--muted);margin-bottom:8px}
+.money{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 14px}
+.money:focus-within{border-color:var(--accent)}
+.money input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:1.25rem;font-weight:700;padding:12px 0;text-align:right;outline:none}
+.money span{font-weight:600;color:var(--muted)}
+.hint{margin:6px 0 0;font-size:.8125rem;color:var(--faint);text-align:right;min-height:1.2em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-size:.875rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.chip:focus-visible,.item>button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.gu{margin-top:10px}.gu .chip{padding:5px 10px;font-size:.8125rem}
+.loaded{margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);font-size:.875rem}
+/* 결과 */
+.filters{margin-top:36px}.filters .money input{font-size:1rem;font-weight:500;text-align:left}.filters .chips{margin-top:10px}
+.result{margin-top:8px}
+.sum{padding:16px 18px;border-radius:14px;background:var(--panel)}.sum b{display:block;font-size:1.125rem}.sum .k{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:.875rem;color:var(--muted)}.sum .k i{font-style:normal;font-weight:700;color:var(--ink)}.sum .hid{margin-top:6px;font-size:.8125rem;color:var(--faint)}
+.sum b{font-size:1.125rem}.sum span{color:var(--muted);font-size:.875rem}
+.group{margin-top:26px}.group h2{font-size:1.0625rem;margin:0 0 4px;display:flex;gap:6px;align-items:center;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.tag{display:inline-block;margin-right:6px;font-size:.75rem;font-weight:700}.tag.ok,.tag.basic{color:var(--ok)}.tag.check{color:var(--unk)}.tag.wait{color:var(--accent)}.tag.no,.tag.closed{color:var(--no)}
+.n{font-size:.8125rem;padding:1px 8px;border-radius:999px;background:var(--panel);color:var(--muted)}
+.item{border-bottom:1px solid var(--line)}
+.item>button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 2px;background:none;border:0;text-align:left;cursor:pointer}
+.item .t{font-weight:700}.item .s{display:block;font-size:.8125rem;color:var(--muted);margin-top:2px}
+.badge{flex:none;font-size:.75rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--panel);color:var(--muted);white-space:nowrap}
+.badge.hot{background:var(--no-soft);color:var(--no)}.badge.soon{background:var(--accent-soft);color:var(--accent)}
+.chev{flex:none;color:var(--faint);transition:transform .15s}.item.open .chev{transform:rotate(180deg)}
+.detail{padding:2px 2px 18px}
+.detail h4{font-size:.8125rem;color:var(--muted);margin:16px 0 6px;font-weight:600}.detail h4:first-child{margin-top:0}
+.crit{list-style:none;margin:0;padding:0;background:var(--panel);border-radius:12px}
+.crit li{display:flex;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:.9rem}.crit li:last-child{border-bottom:0}
+.ic{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:800}
+.ic.pass{background:var(--ok-soft);color:var(--ok)}.ic.fail{background:var(--no-soft);color:var(--no)}.ic.unk{background:var(--unk-soft);color:var(--unk)}.ic.ver{background:var(--surface);color:var(--faint);border:1px solid var(--line)}
+.crit .mine{display:block;font-size:.8125rem;color:var(--muted)}
+.detail p,.detail ol{margin:0;font-size:.9rem}.detail ol{padding-left:20px;color:var(--muted)}
+.go{display:block;margin-top:16px;text-align:center;padding:12px;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;text-decoration:none}
+.more{margin-top:14px;background:none;border:0;color:var(--muted);font-size:.875rem;text-decoration:underline;cursor:pointer;padding:0}
+.raw{margin-top:10px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);font-size:.875rem;white-space:pre-wrap;color:var(--ink);max-height:320px;overflow:auto}
+.raw b{display:block;font-size:.8125rem;color:var(--muted);margin:8px 0 2px}.raw b:first-child{margin-top:0}
+.src{font-size:.6875rem;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--panel);color:var(--faint);margin-left:6px;vertical-align:2px}
+.catmore{display:block;width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--accent);font-weight:600;cursor:pointer}
+.lab small{font-weight:400;color:var(--faint)}
+.empty{padding:28px 0;text-align:center;color:var(--faint)}
+.foot{margin-top:36px;font-size:.8125rem;color:var(--faint)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>청년 혜택 찾기</h1>
+  <p class="lead">정부24에 등록된 공공서비스 전체와 서울시·청년 정책을 내 조건과 비교해 보여드려요.</p>
+
+  <section class="drop" id="drop">
+    <b>서류 올려서 채우기</b>
+    <p>정부24·홈택스에서 받은 서류를 PDF나 캡처로 올리면<br>나이·사는 곳·연봉을 자동으로 채워요. 여기에 끌어다 놓아도 돼요.</p>
+    <label class="pick">파일 고르기<input type="file" id="files" multiple accept=".pdf,application/pdf,image/*" hidden></label>
+  </section>
+  <p class="docs">서류 받기: <a href="https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000015&HighCtgCD=A01010001&Mcode=10200" target="_blank" rel="noopener">주민등록표 등본</a> · <a href="https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=12100000021" target="_blank" rel="noopener">소득금액증명</a> · <a href="https://www.gov.kr/main?a=AA020InfoCappViewApp&HighCtgCD=&CappBizCD=14600000280" target="_blank" rel="noopener">건강보험 자격득실</a></p>
+  <ul class="files" id="fileList"></ul>
+
+  <div class="or">또는 직접 입력</div>
+
+  <section class="panel" aria-label="내 정보">
+    <div class="row">
+      <label for="income">연봉 (세전)</label>
+      <div class="money"><input id="income" inputmode="numeric" autocomplete="off" placeholder="0"><span>원</span></div>
+      <p class="hint" id="incomeHint"></p>
+    </div>
+    <div class="row"><span class="lab">만 나이</span><div class="chips gu" data-key="age" style="margin-top:0"></div></div>
+    <div class="row"><span class="lab">사는 곳</span><div class="chips" data-key="sido"></div><div class="chips gu" data-key="gu" hidden></div></div>
+    <div class="row"><span class="lab">사는 집</span><div class="chips" data-key="housing"></div></div>
+    <div class="row"><span class="lab">지금 상황</span><div class="chips" data-key="status"></div></div>
+    <div class="row"><span class="lab">가구원 수</span><div class="chips" data-key="household"></div></div>
+    <div class="row"><span class="lab">해당되는 것 <small>(여러 개 고를 수 있어요. 없으면 비워 두세요)</small></span><div class="chips" id="specials"></div></div>
+  </section>
+  <div id="loaded"></div>
+
+  <div class="filters" id="filters" hidden>
+    <div class="money"><input id="q" type="search" placeholder="혜택 이름·기관으로 찾기" autocomplete="off" aria-label="혜택 검색"></div>
+    <div class="chips" id="cats" aria-label="분야"></div>
+  </div>
+  <div id="gubar"></div>
+  <section class="result" id="result" aria-live="polite"></section>
+  <p class="foot" id="foot"></p>
+</main>
+
+<script src="policies.js"></script>
+<script>
+const BASE = (window.POLICIES || []).map(p => ({ ...p, youth: true, src: "직접 조사" }));
+// 정부24 공공서비스(서버가 지역·청년 나이로 1차로 거른 목록). 직접 조사한 항목과 이름이 같으면 직접 조사 쪽을 써요.
+const g24 = { key: null, items: [], status: "idle", fetchedAt: null, total: 0 };
+const norm = s => String(s).replace(/\(.*?\)|\[.*?\]|20\d\d년?|[\s·,'"()\-]/g, "").toLowerCase();
+const BASE_N = BASE.map(p => norm(p.name));
+const dupOfBase = n => BASE_N.some(b => b === n || (n.length >= 6 && b.includes(n)) || (b.length >= 6 && n.includes(b)));
+let merged = null;
+const allPolicies = () => merged || (merged = BASE.concat(g24.items.filter(p => !dupOfBase(norm(p.name)))));
+const jsonCache = {};
+const getJSON = name => (jsonCache[name] ||= fetch(`data/${name}.json`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+  .catch(e => { delete jsonCache[name]; throw e; }));
+async function loadGov24() {
+  if (location.protocol === "file:") { g24.status = "file"; drawG24Bar(); return; }
+  const files = ["nat"];
+  const code = { 서울: "seoul", 경기: "gyeonggi", 인천: "incheon" }[me.sido];
+  if (code) files.push(code);
+  if (me.sido === "서울" && me.gu) files.push(`seoul-gu-${String(OPTS.gu.findIndex(o => o.v === me.gu)).padStart(2, "0")}`);
+  const key = files.join("|");
+  if (g24.key === key && g24.status === "ok") return;
+  g24.key = key; g24.status = "loading"; drawG24Bar();
+  try {
+    const [meta, ...lists] = await Promise.all([getJSON("meta"), ...files.map(f => getJSON(f).catch(() => []))]);
+    if (g24.key !== key) return;
+    Object.assign(g24, { status: "ok", items: lists.flat(), fetchedAt: meta.fetchedAt, total: meta.total });
+  } catch (e) { Object.assign(g24, { status: "error", items: [], error: e.message }); }
+  merged = null; render();
+}
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const won = n => n.toLocaleString("ko-KR");
+const man = n => (n >= 1e8 ? `${Math.floor(n/1e8)}억 ` : "") + (n % 1e8 >= 1e4 ? `${won(Math.floor(n % 1e8 / 1e4))}만 ` : "") + "원";
+
+// ---------- 입력 칩 ----------
+const OPTS = {
+  age: [{ v: "~18", t: "18세 이하", a: 0, b: 18 }, ...Array.from({ length: 21 }, (_, i) => ({ v: String(19 + i), t: `${19 + i}`, a: 19 + i, b: 19 + i })), { v: "40~", t: "40세 이상", a: 40, b: 120 }],
+  sido: ["서울","경기","인천","그 외"].map(v => ({v, t:v})),
+  gu: ["강남구","강동구","강북구","강서구","관악구","광진구","구로구","금천구","노원구","도봉구","동대문구","동작구","마포구","서대문구","서초구","성동구","성북구","송파구","양천구","영등포구","용산구","은평구","종로구","중구","중랑구"].map(v => ({v, t:v})),
+  housing: ["월세","전세","부모님 집","자가"].map(v => ({v, t:v})),
+  status: ["재직","비자발 퇴사","구직 중","학생","자영업"].map(v => ({v, t: v === "비자발 퇴사" ? "퇴사 (비자발)" : v})),
+  household: [1,2,3,4].map(v => ({v, t: v === 4 ? "4명 이상" : `${v}명`})),
+};
+const me = { income: null, age: null, sido: null, gu: null, housing: null, status: null, household: null };
+// '해당되는 것' 칩: 고르지 않으면 해당 없음으로 봐요. 정부24 지원조건 이름 → 칩
+const SPECIALS = ["장애인", "국가보훈대상자", "임신·출산", "농림어업인", "질병·질환", "한부모·조손가정", "다문화가족", "북한이탈주민", "다자녀가구", "신규 전입"];
+const GROUP_TO_SPECIAL = { "예비부모·난임": "임신·출산", "임산부": "임신·출산", "출산·입양 가정": "임신·출산", "농업인": "농림어업인", "어업인": "농림어업인", "축산업인": "농림어업인", "임업인": "농림어업인",
+  "장애인": "장애인", "국가보훈대상자": "국가보훈대상자", "질병·질환자": "질병·질환", "한부모·조손가정": "한부모·조손가정", "다문화가족": "다문화가족", "북한이탈주민": "북한이탈주민", "다자녀가구": "다자녀가구", "신규전입": "신규 전입" };
+const specials = new Set();
+const spEl = document.getElementById("specials");
+function drawSpecials() { spEl.innerHTML = SPECIALS.map(v => `<button type="button" class="chip" data-v="${esc(v)}" aria-pressed="${specials.has(v)}">${esc(v)}</button>`).join(""); }
+spEl.addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; const v = b.dataset.v; specials.has(v) ? specials.delete(v) : specials.add(v); drawSpecials(); render(); });
+drawSpecials();
+
+document.querySelectorAll(".chips[data-key]").forEach(box => {
+  const key = box.dataset.key;
+  box.innerHTML = OPTS[key].map(o => `<button type="button" class="chip" data-v="${esc(o.v)}" aria-pressed="false">${esc(o.t)}</button>`).join("");
+  box.addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    const opt = OPTS[key].find(o => String(o.v) === b.dataset.v);
+    set(key, me[key] === opt.v ? null : opt.v);
+  });
+});
+function set(key, v) {
+  me[key] = v;
+  if (key === "sido" && v !== "서울") me.gu = null;
+  if (key === "sido" || key === "gu") loadGov24();
+  syncChips(); render();
+}
+function syncChips() {
+  document.querySelectorAll(".chips[data-key]").forEach(box => {
+    const key = box.dataset.key;
+    box.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", String(me[key]) === b.dataset.v ? "true" : "false"));
+  });
+  document.querySelector('[data-key="gu"]').hidden = me.sido !== "서울";
+}
+
+const incomeEl = document.getElementById("income");
+incomeEl.addEventListener("input", () => {
+  const n = Number(incomeEl.value.replace(/[^\d]/g, "").slice(0, 12));
+  me.income = incomeEl.value.replace(/[^\d]/g, "") === "" ? null : n;
+  incomeEl.value = me.income == null ? "" : won(n);
+  render();
+});
+function setIncome(n) { me.income = n; incomeEl.value = n == null ? "" : won(n); }
+
+// ---------- 판정 ----------
+const MEDIAN = { 1: 2564238, 2: 4199292, 3: 5359036, 4: 6494738 }; // 2026년 기준 중위소득(월)
+function groupHit(groups) {
+  for (const g of groups) { const sp = GROUP_TO_SPECIAL[g]; if (sp && specials.has(sp)) return { hit: g }; }
+  return {};
+}
+const ageBand = () => OPTS.age.find(o => o.v === me.age);
+function ageLabel(c) { return c.label || (c.min <= 0 ? `만 ${c.max}세 이하` : c.max >= 120 ? `만 ${c.min}세 이상` : c.min === c.max ? `만 ${c.min}세` : `만 ${c.min}~${c.max}세`); }
+function check(c) {
+  switch (c.type) {
+    case "age": {
+      const b = ageBand(), label = ageLabel(c);
+      if (!b) return { s: "unk", label, mine: "나이를 골라 주세요" };
+      const mine = `내 나이: ${b.t}`;
+      if (b.a >= c.min && b.b <= c.max) return { s: "pass", label, mine };
+      if (b.b < c.min || b.a > c.max) return { s: "fail", label, mine };
+      return { s: "unk", label, mine: `${mine} · 정확한 나이에 따라 달라요` };
+    }
+    case "region": {
+      const label = c.gu ? `${c.sido} ${c.gu} 거주` : `${c.sido} 거주`;
+      if (!me.sido) return { s: "unk", label, mine: "사는 곳을 골라 주세요" };
+      if (me.sido !== c.sido) return { s: "fail", label, mine: `내 지역: ${me.sido}` };
+      if (!c.gu) return { s: "pass", label, mine: `내 지역: ${me.sido}` };
+      if (!me.gu) return { s: "unk", label, mine: "자치구를 골라 주세요" };
+      return { s: me.gu === c.gu ? "pass" : "fail", label, mine: `내 지역: ${me.sido} ${me.gu}` };
+    }
+    case "status": {
+      const label = c.label || c.in.join(" · ");
+      const g = groupHit(c.orGroups || []);
+      if (g.hit) return { s: "pass", label, mine: `해당: ${g.hit}` };
+      if (!c.in.length) return { s: "fail", label, mine: "‘해당되는 것’에서 고르지 않았어요" };
+      if (!me.status) return { s: "unk", label, mine: "지금 상황을 골라 주세요" };
+      return { s: c.in.includes(me.status) ? "pass" : "fail", label, mine: `내 상황: ${OPTS.status.find(o => o.v === me.status).t}` };
+    }
+    case "groups": { // 가구 특성 중 하나라도 해당
+      const res = c.groups.map(g => g === "1인가구" ? (me.household == null ? "unk" : me.household === 1 ? "pass" : "fail")
+        : g === "무주택세대" ? (me.housing == null ? "unk" : me.housing === "자가" ? "fail" : "pass")
+        : GROUP_TO_SPECIAL[g] && specials.has(GROUP_TO_SPECIAL[g]) ? "pass" : "fail");
+      const s = res.includes("pass") ? "pass" : res.includes("unk") ? "unk" : "fail";
+      return { s, label: `${c.label} 중 하나`, mine: s === "unk" ? "가구원 수·사는 집을 골라 주세요" : s === "pass" ? "해당돼요" : "해당하지 않아요" };
+    }
+    case "household": {
+      const label = c.label || `${c.eq}인 가구`;
+      if (me.household == null) return { s: "unk", label, mine: "가구원 수를 골라 주세요" };
+      return { s: me.household === c.eq ? "pass" : "fail", label, mine: `내 가구: ${me.household}명` };
+    }
+    case "median": { // 기준 중위소득(2026년, 월) 대비 가구 소득
+      const label = `가구 소득 기준 중위소득 ${c.max}% 이하`;
+      if (me.income == null) return { s: "unk", label, mine: "연봉을 입력해 주세요" };
+      if (me.household == null) return { s: "unk", label, mine: "가구원 수를 골라 주세요" };
+      const med = MEDIAN[Math.min(me.household, 4)], pct = Math.round(me.income / 12 / med * 100);
+      const mine = `내 연봉 기준 약 ${pct}% (${me.household >= 4 ? "4인 이상" : me.household + "인"} 가구 중위소득 대비)`;
+      if (pct > c.max) return { s: "fail", label, mine };
+      return me.household === 1 ? { s: "pass", label, mine } : { s: "unk", label, mine: `${mine} · 다른 가구원 소득도 합쳐야 해요` };
+    }
+    case "noHouse": {
+      const label = "무주택";
+      if (!me.housing) return { s: "unk", label, mine: "사는 집을 골라 주세요" };
+      return { s: me.housing === "자가" ? "fail" : "pass", label, mine: `사는 집: ${me.housing}` };
+    }
+    case "housingIn": {
+      const label = c.label || c.in.join(" · ");
+      if (!me.housing) return { s: "unk", label, mine: "사는 집을 골라 주세요" };
+      return { s: c.in.includes(me.housing) ? "pass" : "fail", label, mine: `사는 집: ${me.housing}` };
+    }
+    case "target":
+      return { s: "unk", label: c.label, mine: "해당되는지 직접 확인해 주세요" };
+    case "incomeMax": {
+      const label = c.label || `본인 연소득 ${man(c.max)} 이하`;
+      if (me.income == null) return { s: "unk", label, mine: "연봉을 입력해 주세요" };
+      return { s: me.income <= c.max ? "pass" : "fail", label, mine: `내 연봉: ${man(me.income)}` };
+    }
+    case "eitc": {
+      // 총소득 기준: 단독 2,200만 / 홑벌이 3,200만 / 맞벌이 4,400만 원 미만
+      const label = "가구 총소득 기준 미만 (단독 2,200만 · 홑벌이 3,200만 · 맞벌이 4,400만 원)";
+      if (me.income == null) return { s: "unk", label, mine: "연봉을 입력해 주세요" };
+      const mine = `내 연봉: ${man(me.income)}`;
+      if (me.income <= 0) return { s: "fail", label, mine: `${mine} · 근로소득이 있어야 해요` };
+      if (me.income < 22e6) return { s: "pass", label, mine };
+      if (me.income >= 44e6) return { s: "fail", label, mine };
+      if (me.household === 1) return { s: "fail", label, mine: `${mine} · 1인 가구 기준 초과` };
+      if (me.household == null) return { s: "unk", label, mine: `${mine} · 가구원 수에 따라 달라요` };
+      if (me.income < 32e6) return { s: "pass", label, mine: `${mine} · 홑벌이 기준` };
+      return { s: "unk", label, mine: `${mine} · 맞벌이 가구일 때만 해당` };
+    }
+  }
+  return { s: "unk", label: c.label || c.type, mine: "" };
+}
+
+const pad = n => String(n).padStart(2, "0");
+const todayStr = (() => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; })();
+const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
+function period(p) {
+  if (p.waiting) return { t: "다음 모집 대기", cls: "soon", text: "다음 모집 일정 미정 (자격조건의 공고 확인 항목 참고)", wait: true };
+  if (p.always) return { t: "상시", text: "상시 신청" };
+  if (p.applyEnd && p.applyEnd < todayStr) return { closed: true, t: "마감", text: `${p.applyStart || "?"} ~ ${p.applyEnd}${p.periodText ? ` (${p.periodText})` : ""}` };
+  const text = p.applyStart || p.applyEnd ? `${p.applyStart || "?"} ~ ${p.applyEnd || "공고 확인"}${p.periodText ? ` (${p.periodText})` : ""}` : p.periodText || "공고에서 일정 확인";
+  if (p.applyStart && p.applyStart > todayStr) return { t: `${days(todayStr, p.applyStart)}일 뒤 시작`, cls: "soon", text };
+  if (p.applyEnd) { const d = days(todayStr, p.applyEnd); return { t: d === 0 ? "오늘 마감" : `D-${d}`, cls: d <= 7 ? "hot" : "", text, d }; }
+  return { t: "일정 확인", text };
+}
+
+// ---------- 결과 그리기 ----------
+const open = new Set();
+const filt = { cat: null, q: "" };
+const CAT_ORDER = ["주거", "일자리", "예적금", "대출", "금융상담·신용", "세금", "교육", "교통", "문화", "건강·마음", "생활·복지", "임신·출산·육아", "농림어업"];
+const CAT_LIMIT = 10, expandedCats = new Set();
+const youthOnly = false;
+const isYouth = p => p.youth || (p.criteria || []).some(c => c.type === "age" && c.max <= 39 && c.min >= 15);
+const sortCats = cats => cats.sort((a, b) => (CAT_ORDER.indexOf(a) + 1 || 99) - (CAT_ORDER.indexOf(b) + 1 || 99));
+const catsEl = document.getElementById("cats");
+function drawCats() {
+  const cats = sortCats([...new Set(allPolicies().map(p => p.category).filter(Boolean))]);
+  if (filt.cat && !cats.includes(filt.cat)) filt.cat = null;
+  catsEl.innerHTML = [["", "전체"], ...cats.map(c => [c, c])].map(([v, t]) =>
+    `<button type="button" class="chip" data-v="${esc(v)}" aria-pressed="${(filt.cat || "") === v}">${esc(t)}</button>`).join("");
+}
+catsEl.addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; filt.cat = b.dataset.v || null; drawCats(); render(); });
+document.getElementById("q").addEventListener("input", e => { filt.q = e.target.value; render(); });
+drawCats();
+let showNo = false, showClosed = false, showGeneral = false;
+function itemHTML(p, r) {
+  const per = r.per, isOpen = open.has(p.id);
+  return `<div class="item${isOpen ? " open" : ""}">
+    <button type="button" data-id="${esc(p.id)}" aria-expanded="${isOpen}">
+      <span><span class="t">${esc(p.name)}${p.src === "정부24" ? `<span class="src">정부24</span>` : ""}</span><span class="s"><span class="tag ${r.s}">${{ ok: "✓ 조건 충족", basic: "✓ 기본 조건 맞음 · 원문 확인", check: "? 확인 필요", wait: "다음 모집 대기", no: "✕ 조건 안 맞음", closed: "마감" }[r.s]}</span>${esc(p.org)}</span></span>
+      <span style="display:flex;gap:8px;align-items:center"><span class="badge ${per.cls || ""}">${esc(per.t)}</span><span class="chev" aria-hidden="true">▾</span></span>
+    </button>
+    ${isOpen ? `<div class="detail">
+      <h4>자격조건</h4>
+      <ul class="crit">
+        ${r.res.map(x => `<li><span class="ic ${x.s}" aria-label="${x.s === "pass" ? "충족" : x.s === "fail" ? "미충족" : "확인 필요"}">${x.s === "pass" ? "✓" : x.s === "fail" ? "✕" : "?"}</span><span>${esc(x.label)}<span class="mine">${esc(x.mine)}</span></span></li>`).join("")}
+        ${!r.res.length ? `<li><span class="ic unk" aria-label="확인 필요">?</span><span>자동으로 비교할 수 있는 조건이 없어요<span class="mine">아래 조건을 공고에서 확인해 주세요</span></span></li>` : ""}
+        ${(p.verify || []).map(v => `<li><span class="ic ver" aria-label="공고에서 확인">!</span><span>${esc(v)}<span class="mine">공고에서 직접 확인</span></span></li>`).join("")}
+      </ul>
+      ${p.raw ? `<div class="raw">${p.raw.지원대상 ? `<b>지원대상 (정부24 원문)</b>${esc(p.raw.지원대상)}` : ""}${p.raw.선정기준 ? `<b>선정기준 (정부24 원문)</b>${esc(p.raw.선정기준)}` : ""}</div>` : ""}
+      <h4>받는 것</h4><p style="white-space:pre-wrap">${esc(p.raw?.지원내용 || p.benefit)}</p>
+      <h4>신청 기간</h4><p>${esc(per.text)}</p>
+      ${(p.howTo || []).length ? `<h4>신청하는 법</h4><ol>${p.howTo.map(h => `<li style="white-space:pre-wrap">${esc(h)}</li>`).join("")}</ol>` : ""}
+      ${p.contact ? `<h4>문의</h4><p>${esc(p.contact)}</p>` : ""}
+      <a class="go" href="${esc(p.url)}" target="_blank" rel="noopener">${p.src === "정부24" ? "정부24에서 자세히 보기·신청" : "신청 사이트 열기"}</a>
+    </div>` : ""}
+  </div>`;
+}
+function render() {
+  const el = document.getElementById("result");
+  const started = me.income != null || Object.entries(me).some(([k, v]) => k !== "income" && v != null);
+  document.getElementById("filters").hidden = !started;
+  drawG24Bar();
+  if (!started) { el.innerHTML = `<p class="empty">연봉을 입력하면 여기에 혜택이 보여요.</p>`; return; }
+
+  const q = filt.q.trim().toLowerCase();
+  drawCats();
+  const rows = allPolicies().filter(p => (!filt.cat || p.category === filt.cat) && (!youthOnly || isYouth(p)) &&
+      (!q || [p.name, p.org, p.benefit, p.region, p.category].join(" ").toLowerCase().includes(q))).map(p => {
+    const per = period(p), res = (p.criteria || []).map(check);
+    // 자동으로 확인한 조건이 하나도 없으면 '신청해볼 만해요'로 단정하지 않아요
+    const s = res.some(x => x.s === "fail") ? "no" : res.some(x => x.s === "unk") || !res.length ? "check" : "ok";
+    return { p, per, res, s };
+  });
+  const closed = rows.filter(r => r.per.closed).length;
+  const rank = { ok: 0, basic: 1, check: 2, wait: 3 };
+  const live = rows.filter(r => !r.per.closed)
+    .map(r => (r.per.wait && r.s !== "no" ? { ...r, s: "wait" } : r.p.src === "정부24" && r.s === "ok" ? { ...r, s: "basic" } : r))
+    .sort((a, b) => (rank[a.s] ?? 3) - (rank[b.s] ?? 3) || isYouth(b.p) - isYouth(a.p) || (a.per.d ?? 999) - (b.per.d ?? 999));
+  const visible = live.filter(r => r.s !== "no"), no = live.filter(r => r.s === "no");
+  const shown = visible.filter(r => isYouth(r.p)), general = visible.filter(r => !isYouth(r.p));
+  const cnt = k => shown.filter(r => r.s === k).length;
+  const total = allPolicies().length;
+
+  let h = `<div class="sum"><b>찾은 혜택 ${total.toLocaleString()}개 중 청년 대상 ${shown.length}개를 보여드려요</b>
+    <div class="k"><span>조건 충족 <i>${cnt("ok")}</i></span><span>기본 조건 맞음 <i>${cnt("basic")}</i></span><span>확인 필요 <i>${cnt("check")}</i></span>${cnt("wait") ? `<span>다음 모집 대기 <i>${cnt("wait")}</i></span>` : ""}</div>
+    <div class="hid">‘조건 충족’은 공고 원문으로 조건을 정리한 항목, ‘기본 조건 맞음’은 정부24 조건 코드(나이·소득·대상)가 맞는 항목이에요. 원문 자격을 꼭 확인하세요.<br>
+    전 연령 대상 일반 서비스 ${general.length}개는 맨 아래에 접어 뒀고, 조건이 맞지 않는 ${no.length}개${closed ? `, 마감된 ${closed}개` : ""}는 숨겼어요.${q || filt.cat || youthOnly ? " (검색·필터 적용 중)" : ""}</div></div>`;
+  const byCat = arr => {
+    const g = {};
+    arr.forEach(r => (g[r.p.category || "기타"] ||= []).push(r));
+    return sortCats(Object.keys(g)).map(c => {
+      const all = g[c], open = expandedCats.has(c) || q || filt.cat, list = open ? all : all.slice(0, CAT_LIMIT);
+      return `<div class="group"><h2>${esc(c)} <span class="n">${all.length}</span></h2>${list.map(r => itemHTML(r.p, r)).join("")}${all.length > list.length ? `<button type="button" class="catmore" data-cat="${esc(c)}">${esc(c)} ${all.length - list.length}개 더 보기</button>` : ""}</div>`;
+    }).join("");
+  };
+  h += shown.length ? byCat(shown) : `<p class="empty">${q || filt.cat ? "검색·필터에 맞는 혜택이 없어요." : "지금 조건에 맞는 혜택이 없어요."}</p>`;
+  const closedRows = rows.filter(r => r.per.closed).map(r => ({ ...r, s: "closed" }));
+  if (q) {
+    if (general.length) h += byCat(general);
+    const rest = no.concat(closedRows);
+    if (rest.length) h += `<p class="more" style="text-decoration:none">검색어와 맞는 혜택 중 지금 조건이 안 맞거나 마감된 ${rest.length}개</p>` + byCat(rest);
+  } else {
+    if (general.length) {
+      h += `<button type="button" class="more" id="toggleGeneral">전 연령 대상 일반 서비스 ${general.length}개 ${showGeneral ? "접기" : "보기"} (청년도 받을 수 있지만 청년 전용은 아니에요)</button>`;
+      if (showGeneral) h += byCat(general);
+      h += "<br>";
+    }
+    if (no.length) {
+      h += `<button type="button" class="more" id="toggleNo">조건이 맞지 않는 ${no.length}개 ${showNo ? "접기" : "보기"}</button>`;
+      if (showNo) h += byCat(no);
+    }
+    if (closedRows.length) {
+      h += `<br><button type="button" class="more" id="toggleClosed">마감된 ${closedRows.length}개 ${showClosed ? "접기" : "보기"} (매년 하는 사업이면 다음 모집 때 다시 열려요)</button>`;
+      if (showClosed) h += byCat(closedRows);
+    }
+  }
+  el.innerHTML = h;
+  document.getElementById("foot").textContent =
+    `정부24 목록은 ${g24.fetchedAt || "-"} 기준이고, 직접 조사한 정책은 ${window.POLICIES_CHECKED || "-"} 기준이에요. 결과는 참고용이니 신청 전에 꼭 공고 원문을 확인하세요. 입력한 정보와 올린 서류는 이 브라우저 안에서만 처리되고 어디에도 보내지 않아요.`;
+}
+document.getElementById("result").addEventListener("click", e => {
+  if (e.target.id === "toggleNo") { showNo = !showNo; render(); return; }
+  if (e.target.id === "toggleClosed") { showClosed = !showClosed; render(); return; }
+  if (e.target.id === "toggleGeneral") { showGeneral = !showGeneral; render(); return; }
+  const more = e.target.closest(".catmore"); if (more) { expandedCats.add(more.dataset.cat); render(); return; }
+  const b = e.target.closest(".item>button"); if (!b) return;
+  const id = b.dataset.id; open.has(id) ? open.delete(id) : open.add(id);
+  render();
+});
+
+// ---------- 서류 올리기 (모두 브라우저 안에서 처리, 파일은 어디에도 보내지 않아요) ----------
+let pdfjsLib = null, ocrWorker = null;
+async function pdfText(buf) {
+  if (!pdfjsLib) {
+    pdfjsLib = await import("./vendor/pdf.min.mjs");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("vendor/pdf.worker.min.mjs", location.href).href;
+  }
+  const task = pdfjsLib.getDocument({ data: new Uint8Array(buf), isEvalSupported: false });
+  const doc = await task.promise;
+  let out = "";
+  for (let i = 1; i <= doc.numPages; i++) {
+    const { items } = await (await doc.getPage(i)).getTextContent();
+    const rows = new Map(); // 같은 높이의 글자를 한 줄로
+    for (const it of items) {
+      if (!it.str?.trim()) continue;
+      const y = Math.round(it.transform[5] / 3);
+      if (!rows.has(y)) rows.set(y, []);
+      rows.get(y).push([it.transform[4], it.str]);
+    }
+    out += [...rows.entries()].sort((a, b) => b[0] - a[0]).map(([, r]) => r.sort((a, b) => a[0] - b[0]).map(x => x[1]).join(" ")).join("\n") + "\n";
+  }
+  await task.destroy();
+  return out;
+}
+function loadScript(src) { return new Promise((ok, no) => { const el = document.createElement("script"); el.src = src; el.onload = ok; el.onerror = () => no(new Error("글자 인식 도구를 불러오지 못했어요")); document.head.appendChild(el); }); }
+async function imageText(file) {
+  if (!ocrWorker) {
+    if (!window.Tesseract) await loadScript("vendor/tesseract.min.js");
+    ocrWorker = await Tesseract.createWorker("kor+eng", 1, { workerPath: new URL("vendor/worker.min.js", location.href).href });
+  }
+  const { data } = await ocrWorker.recognize(file);
+  return data.text;
+}
+async function readDoc(f) {
+  const buf = await f.arrayBuffer();
+  const isPdf = f.type.includes("pdf") || new TextDecoder().decode(buf.slice(0, 5)) === "%PDF-";
+  if (!isPdf && !f.type.startsWith("image/")) throw new Error("PDF나 이미지 파일만 올릴 수 있어요");
+  const text = isPdf ? await pdfText(buf) : await imageText(f);
+  if (text.replace(/\s/g, "").length < 20) return { type: null, fields: {}, note: "글자를 거의 읽지 못했어요" };
+  const { extract } = await import("./parse.mjs");
+  return extract(text); // 원문 글자는 어디에도 저장하지 않아요
+}
+
+const DOC_NAMES = { resident: "주민등록표 등본", income: "소득금액증명", nhis: "건강보험 자격득실" };
+const readFields = {};
+const fileList = document.getElementById("fileList"), drop = document.getElementById("drop");
+async function handleFiles(files) {
+  if (location.protocol === "file:") {
+    fileList.innerHTML = `<li><span class="fn">서류 읽기는 <b>청년혜택_실행.bat</b>이나 웹페이지 주소로 열었을 때만 돼요.</span></li>`; return;
+  }
+  for (const f of files) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="fn">${esc(f.name)}</span><span class="st">${f.type.startsWith("image/") ? "글자 인식 중 (처음엔 1분쯤)" : "읽는 중"}</span>`;
+    fileList.appendChild(li);
+    const st = li.querySelector(".st");
+    try {
+      const j = await readDoc(f);
+      const n = Object.keys(j.fields || {}).length;
+      if (!n) { st.className = "st bad"; st.textContent = j.note || "필요한 정보를 못 찾았어요"; continue; }
+      Object.assign(readFields, j.fields);
+      st.className = "st ok"; st.textContent = `${DOC_NAMES[j.type] || "서류"}에서 읽었어요`;
+      applyProfile(readFields);
+    } catch (e) { st.className = "st bad"; st.textContent = e.message; }
+  }
+}
+document.getElementById("files").addEventListener("change", e => { handleFiles([...e.target.files]); e.target.value = ""; });
+["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => handleFiles([...e.dataTransfer.files]));
+
+// ---------- 정부24 목록 상태 ----------
+function drawG24Bar() {
+  const el = document.getElementById("gubar");
+  const msg = {
+    loading: "정부24 공공서비스 목록을 불러오는 중이에요.",
+    error: `정부24 목록을 불러오지 못했어요${g24.error ? `: ${g24.error}` : ""}. 직접 조사한 정책만 보여요.`,
+    file: "정부24 목록과 서류 읽기는 청년혜택_실행.bat 으로 열거나 웹페이지 주소로 열었을 때만 돼요.",
+  }[g24.status];
+  const where = me.sido ? [me.sido, me.sido === "서울" ? me.gu : null].filter(Boolean).join(" ") : "전국";
+  el.innerHTML = msg ? `<p class="gubar">${esc(msg)}</p>`
+    : g24.status === "ok" ? `<p class="gubar">정부24 공공서비스 ${g24.total.toLocaleString()}건 중 <b>${esc(where)}</b>·청년 나이에 해당할 수 있는 ${g24.items.length.toLocaleString()}건과 직접 조사한 ${BASE.length}건을 내 조건과 비교했어요.${me.sido === "서울" && !me.gu ? " 사는 구를 고르면 구청 사업도 더해져요." : ""}</p>` : "";
+}
+
+function applyProfile(p) {
+  const filled = [];
+  if (p.annualIncome != null) { setIncome(p.annualIncome); filled.push(`연봉 ${man(p.annualIncome)}${p.incomeYear ? ` (${p.incomeYear}년)` : ""}`); }
+  if (p.age != null) { const b = OPTS.age.find(o => p.age >= o.a && p.age <= o.b); if (b) { me.age = b.v; filled.push(`만 ${p.age}세`); } }
+  if (p.sido) {
+    me.sido = ["서울", "경기", "인천"].includes(p.sido) ? p.sido : "그 외";
+    me.gu = me.sido === "서울" && OPTS.gu.some(o => o.v === p.sigungu) ? p.sigungu : null;
+    loadGov24();
+    filled.push([p.sido, p.sigungu].filter(Boolean).join(" "));
+  }
+  if (p.household != null) { me.household = Math.min(4, p.household); filled.push(`${p.household}인 가구`); }
+  if (p.nhisType) filled.push(`건강보험 ${p.nhisType}`);
+  syncChips(); render();
+  document.getElementById("loaded").innerHTML = filled.length
+    ? `<p class="loaded"><b>서류에서 읽었어요:</b> ${esc(filled.join(" · "))}<br>자동으로 읽은 값이라 틀릴 수 있어요. 위에서 바로 고칠 수 있어요. 사는 집과 지금 상황은 서류에 없어서 직접 골라 주세요.</p>`
+    : "";
+}
+
+loadGov24();
+render();
+</script>
+</body>
+</html>

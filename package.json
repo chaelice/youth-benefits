@@ -1,0 +1,17 @@
+{
+  "name": "youth-benefit-local",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "정부24 공공서비스와 청년 정책을 내 조건과 비교해 보여주는 페이지 (로컬 실행 + GitHub Pages)",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "data": "node scripts/build-data.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "playwright": "1.65.1"
+  }
+}

@@ -1,0 +1,46 @@
+# 매주 정부24 공공서비스 목록을 새로 받아 웹페이지(GitHub Pages)를 다시 올려요.
+# 공공데이터포털 키는 저장소 Settings → Secrets 의 DATA_GO_KR_KEY 에만 있고, 페이지·저장소에는 들어가지 않아요.
+name: 웹페이지 갱신
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 18 * * 0" # 매주 월요일 03:00 (한국 시간)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 정부24 목록 받기 + 지역별 파일 만들기
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+        run: node scripts/build-data.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
